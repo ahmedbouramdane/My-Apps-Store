@@ -141,6 +141,14 @@
     }
     .file-actions .del-btn { color: #dc5a4a; }
     .file-actions .del-btn:hover { background: #fdf0ee; }
+    .file-actions .edit-btn { color: var(--primary); }
+    .file-actions .edit-btn:hover { background: #fff4d6; }
+    .edit-panel { display: none; }
+    .edit-panel.active { display: block; }
+    .edit-title { font-size: 1rem; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; color: var(--text-strong, var(--text)); }
+    .edit-title i { color: var(--primary); }
+    .edit-cancel { background: #fff; border: 1px solid var(--border); color: var(--text); margin-left: 8px; }
+    .edit-cancel:hover { background: var(--bg); }
     .no-files { color: var(--muted); font-size: .9rem; padding: 16px 0; }
     @media (max-width: 640px) {
       .span-2 { grid-column: span 1; }
@@ -209,6 +217,54 @@
           <div class="span-2">
             <button class="btn btn-primary" type="submit" id="app_btn">
               <i class="fas fa-cloud-upload-alt"></i> Upload
+            </button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel edit-panel" id="editPanel">
+      <h2 class="edit-title"><i class="fas fa-pen"></i> Edit app <button class="btn edit-cancel" type="button" id="editCancel"><i class="fas fa-times"></i> Cancel</button></h2>
+      <form id="editForm">
+        <input type="hidden" id="edit_id">
+        <div class="grid">
+          <div class="field span-2">
+            <label for="edit_name">App name</label>
+            <input type="text" id="edit_name" name="name" required>
+          </div>
+          <div class="field">
+            <label for="edit_os">Target OS</label>
+            <select id="edit_os" name="os_target">
+              <option>Android</option><option>iOS</option><option>Windows</option>
+              <option>macOS</option><option>Linux</option><option>Web</option><option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="edit_version">Version</label>
+            <input type="text" id="edit_version" name="version">
+          </div>
+          <div class="field span-2">
+            <label for="edit_developer">Developer</label>
+            <input type="text" id="edit_developer" name="developer">
+          </div>
+          <div class="field span-2">
+            <label for="edit_description">Description</label>
+            <textarea id="edit_description" name="description" required></textarea>
+          </div>
+          <div class="field span-2" id="edit_icon_wrap">
+            <label for="edit_icon">Replace icon (optional, leave empty to keep current)</label>
+            <input type="file" id="edit_icon" name="icon" accept="image/*">
+          </div>
+          <div class="field span-2" id="edit_icon_remove_wrap" style="display:none;">
+            <label><input type="checkbox" id="edit_remove_icon" name="remove_icon"> Remove current icon</label>
+          </div>
+          <div class="field span-2">
+            <label for="edit_screenshots">Add more screenshots (optional)</label>
+            <input type="file" id="edit_screenshots" name="screenshots" accept="image/*" multiple>
+          </div>
+          <div class="span-2">
+            <button class="btn btn-primary" type="submit" id="edit_btn">
+              <i class="fas fa-save"></i> Save changes
             </button>
           </div>
         </div>
@@ -295,6 +351,7 @@
               '<td>' + fmtSize(doc.size) + '</td>' +
               '<td>' + (doc.screenshots && doc.screenshots.length ? doc.screenshots.length + ' <i class="fas fa-camera"></i>' : '—') + '</td>' +
               '<td class="file-actions">' +
+              '  <button class="edit-btn" onclick="editApp(\'' + esc(doc.id) + '\')"><i class="fas fa-pen"></i> Edit</button>' +
               '  <button class="del-btn" onclick="deleteApp(\'' + esc(doc.id) + '\')"><i class="fas fa-trash"></i> Delete</button>' +
               '</td></tr>';
           });
@@ -316,6 +373,58 @@
         })
         .catch(function () { showToast('Network error.'); });
     }
+
+    /* --- Edit app --- */
+    function editApp(id) {
+      fetch('api/apps')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var doc = (data.apps || []).find(function (a) { return a.id === id; });
+          if (!doc) { showToast('App not found.'); return; }
+          document.getElementById('edit_id').value = doc.id;
+          document.getElementById('edit_name').value = doc.name || '';
+          document.getElementById('edit_os').value = doc.os_target || 'Other';
+          document.getElementById('edit_version').value = doc.version || '';
+          document.getElementById('edit_developer').value = doc.developer || '';
+          document.getElementById('edit_description').value = doc.description || '';
+          document.getElementById('edit_icon').value = '';
+          document.getElementById('edit_screenshots').value = '';
+          document.getElementById('edit_remove_icon').checked = false;
+          var hasIcon = !!doc.icon_url;
+          document.getElementById('edit_icon_remove_wrap').style.display = hasIcon ? 'flex' : 'none';
+          var wrap = document.getElementById('editPanel');
+          wrap.classList.add('active');
+          wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        })
+        .catch(function () { showToast('Error loading app.'); });
+    }
+
+    document.getElementById('editCancel').addEventListener('click', function () {
+      document.getElementById('editPanel').classList.remove('active');
+    });
+
+    document.getElementById('editForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var id = document.getElementById('edit_id').value;
+      if (!id) return;
+      var fd = new FormData(this);
+      var btn = document.getElementById('edit_btn');
+      btn.disabled = true;
+      fetch('api/apps/' + encodeURIComponent(id) + '/update', { method: 'POST', body: fd })
+        .then(function (r) {
+          return r.json().then(function (j) {
+            if (!r.ok || !j.ok) throw new Error(j.detail || 'update failed');
+            return j;
+          });
+        })
+        .then(function () {
+          showToast('Changes saved.');
+          document.getElementById('editPanel').classList.remove('active');
+          loadApps();
+        })
+        .catch(function (err) { showToast(err.message || 'Update failed.'); })
+        .finally(function () { btn.disabled = false; });
+    });
 
     document.getElementById('mg_load').addEventListener('click', loadApps);
     loadApps();
