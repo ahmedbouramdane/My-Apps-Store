@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Apps Store - Upload</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    :root {
+      --bg: #fcf9f1;
+      --card: #ffffff;
+      --text: #40382a;
+      --muted: #938457;
+      --border: #e7dcc0;
+      --primary: #c98a00;
+      --primary-hover: #ad7600;
+      --on-primary: #241f14;
+      --accent: #b8860b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+
+    .dash-head {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 0;
+      margin-bottom: 28px;
+    }
+    .dash-head h1 { font-size: 1.4rem; display: flex; align-items: center; gap: 10px; }
+    .dash-head h1 i { color: var(--primary); }
+    .dash-head p { color: var(--muted); font-size: 0.95rem; }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 22px;
+      margin-bottom: 22px;
+    }
+    .panel h2 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel h2 i { color: var(--primary); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    input[type="text"], input[type="file"], textarea, select {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      width: 100%;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--primary); }
+    textarea { resize: vertical; min-height: 90px; }
+    .span-2 { grid-column: span 2; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .btn-primary { background: var(--primary); color: var(--on-primary); }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--text);
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: 6px;
+      z-index: 200;
+      transition: transform 0.25s, opacity 0.25s;
+      opacity: 0;
+      font-size: 0.92rem;
+      max-width: 90%;
+      text-align: center;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    .hint {
+      background: #fff1c4;
+      border: 1px solid #e7dcc0;
+      color: #8a6a00;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      margin-bottom: 18px;
+    }
+
+    .file-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    .file-table th, .file-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    .file-table th { color: var(--muted); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .5px; }
+    .file-table tr:hover td { background: #fdf6e3; }
+    .file-actions { display: flex; gap: 6px; }
+    .file-actions button {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: .82rem;
+      background: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .file-actions .del-btn { color: #dc5a4a; }
+    .file-actions .del-btn:hover { background: #fdf0ee; }
+    .no-files { color: var(--muted); font-size: .9rem; padding: 16px 0; }
+    @media (max-width: 640px) {
+      .span-2 { grid-column: span 1; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="dash-head">
+    <div class="wrap">
+      <h1><i class="fas fa-rocket"></i> My Apps Store</h1>
+      <p>Upload — packages (APK, EXE...) and screenshots are saved into docs/static/files/apps and read by the static site.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="hint">
+      <i class="fas fa-info-circle"></i>
+      The static site reads the apps from <b>static/apps-index.js</b>, regenerated automatically on upload or delete.
+    </div>
+
+    <section class="panel">
+      <h2><i class="fas fa-cloud-upload-alt"></i> Upload an app</h2>
+      <form id="appForm">
+        <div class="grid">
+          <div class="field span-2">
+            <label for="app_name">App name</label>
+            <input type="text" id="app_name" name="name" placeholder="e.g. My Application" required>
+          </div>
+          <div class="field">
+            <label for="app_os">Target OS</label>
+            <select id="app_os" name="os_target">
+              <option>Android</option>
+              <option>iOS</option>
+              <option>Windows</option>
+              <option>macOS</option>
+              <option>Linux</option>
+              <option>Web</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="app_version">Version</label>
+            <input type="text" id="app_version" name="version" placeholder="e.g. 1.0.0">
+          </div>
+          <div class="field span-2">
+            <label for="app_developer">Developer</label>
+            <input type="text" id="app_developer" name="developer" placeholder="e.g. Mohamed Alaoui">
+          </div>
+          <div class="field span-2">
+            <label for="app_description">Description</label>
+            <textarea id="app_description" name="description" placeholder="Describe the app and its features..." required></textarea>
+          </div>
+          <div class="field span-2">
+            <label for="app_package">Package file (APK, EXE, MSI, AAB, DEB, ZIP...)</label>
+            <input type="file" id="app_package" name="package" required>
+          </div>
+          <div class="field span-2">
+            <label for="app_icon">App icon (PNG, JPG, WebP...)</label>
+            <input type="file" id="app_icon" name="icon" accept="image/*">
+          </div>
+          <div class="field span-2">
+            <label for="app_screenshots">Screenshots (multiple, JPG/PNG/WebP...)</label>
+            <input type="file" id="app_screenshots" name="screenshots" accept="image/*" multiple>
+          </div>
+          <div class="span-2">
+            <button class="btn btn-primary" type="submit" id="app_btn">
+              <i class="fas fa-cloud-upload-alt"></i> Upload
+            </button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2><i class="fas fa-folder-open"></i> Existing apps</h2>
+      <button class="btn btn-primary" type="button" id="mg_load">
+        <i class="fas fa-sync-alt"></i> Load apps
+      </button>
+      <div id="mg_list" style="margin-top:18px;"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    var toastTimeout;
+
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(function () { t.classList.remove('show'); }, 2200);
+    }
+
+    function esc(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function fmtSize(bytes) {
+      if (bytes == null) return '';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    /* --- Upload form --- */
+    document.getElementById('appForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var fd = new FormData(this);
+      var btn = document.getElementById('app_btn');
+      btn.disabled = true;
+      fetch('api/apps/upload', { method: 'POST', body: fd })
+        .then(function (r) {
+          return r.json().then(function (j) {
+            if (!r.ok || !j.ok) throw new Error(j.detail || 'upload failed');
+            return j;
+          });
+        })
+        .then(function () {
+          showToast('App uploaded.');
+          var inputs = ['app_name', 'app_os', 'app_version', 'app_developer', 'app_description', 'app_package', 'app_icon', 'app_screenshots'];
+          inputs.forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el && el.type === 'file') el.value = '';
+            else if (el) el.value = (id === 'app_os') ? 'Android' : '';
+          });
+          loadApps();
+        })
+        .catch(function (err) { showToast(err.message || 'Upload failed.'); })
+        .finally(function () { btn.disabled = false; });
+    });
+
+    /* --- Manage existing apps --- */
+    function loadApps() {
+      var container = document.getElementById('mg_list');
+      container.innerHTML = '<p class="no-files"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
+      fetch('api/apps')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data.ok || !data.apps || data.apps.length === 0) {
+            container.innerHTML = '<p class="no-files">No apps yet.</p>';
+            return;
+          }
+          var html = '<table class="file-table"><thead><tr><th>Name</th><th>OS</th><th>Version</th><th>Size</th><th>Screenshots</th><th>Actions</th></tr></thead><tbody>';
+          data.apps.forEach(function (doc) {
+            html += '<tr>' +
+              '<td><strong>' + esc(doc.name) + '</strong><br><span style="font-size:.8rem;color:var(--muted);">' + esc(doc.developer || '') + '</span></td>' +
+              '<td>' + esc(doc.os_target) + '</td>' +
+              '<td>' + esc(doc.version || '—') + '</td>' +
+              '<td>' + fmtSize(doc.size) + '</td>' +
+              '<td>' + (doc.screenshots && doc.screenshots.length ? doc.screenshots.length + ' <i class="fas fa-camera"></i>' : '—') + '</td>' +
+              '<td class="file-actions">' +
+              '  <button class="del-btn" onclick="deleteApp(\'' + esc(doc.id) + '\')"><i class="fas fa-trash"></i> Delete</button>' +
+              '</td></tr>';
+          });
+          html += '</tbody></table>';
+          container.innerHTML = html;
+        })
+        .catch(function () {
+          container.innerHTML = '<p class="no-files">Error while loading.</p>';
+        });
+    }
+
+    function deleteApp(id) {
+      if (!confirm('Delete this app? This action cannot be undone.')) return;
+      fetch('api/apps/' + encodeURIComponent(id) + '/delete', { method: 'POST' })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          if (j.ok) { showToast('App deleted.'); loadApps(); }
+          else { showToast(j.detail || 'Error'); }
+        })
+        .catch(function () { showToast('Network error.'); });
+    }
+
+    document.getElementById('mg_load').addEventListener('click', loadApps);
+    loadApps();
+  </script>
+</body>
+</html>
