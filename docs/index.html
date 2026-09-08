@@ -6,6 +6,10 @@
   <meta name="description" content="My Apps Store - A collection of downloadable apps and softwares.">
   <meta name="theme-color" content="#c98a00">
   <title>My Apps Store</title>
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css">
   <link rel="stylesheet" href="css/style.css">
@@ -14,7 +18,11 @@
   <header class="navbar">
     <div class="container nav-inner">
       <a href="#/" class="brand">
-        <span class="logo"><i class="fas fa-rocket"></i></span>
+        <span class="logo" id="siteLogo">
+          <i class="fas fa-rocket logo-icon"></i>
+          <img class="logo-img" src="assets/logo.png" alt="My Apps Store" style="display:none"
+               onload="this.style.display='block'; this.closest('.logo').classList.add('has-img')">
+        </span>
         <span>My Apps Store</span>
       </a>
       <nav class="nav-links" id="navLinks">
@@ -32,6 +40,20 @@
   </section>
 
   <main id="app" class="app container" aria-live="polite"></main>
+
+  <div class="compat-backdrop" id="compatBackdrop" hidden>
+    <div class="compat-modal" role="alertdialog" aria-modal="true" aria-labelledby="compatTitle">
+      <button class="compat-close" id="compatClose" aria-label="Close"><i class="fas fa-times"></i></button>
+      <div class="compat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+      <h3 id="compatTitle">Platform not supported</h3>
+      <p class="compat-body" id="compatBody"></p>
+      <p class="compat-sub" id="compatSub"></p>
+      <a class="btn compat-wa" id="compatWa" target="_blank" rel="noopener" href="#">
+        <i class="fab fa-whatsapp"></i> Contact developers on WhatsApp
+      </a>
+      <button class="btn compat-dismiss" id="compatDismiss">Continue anyway</button>
+    </div>
+  </div>
 
   <footer class="footer">
     <div class="container footer-inner">

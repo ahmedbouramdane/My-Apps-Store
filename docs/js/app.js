@@ -22,8 +22,74 @@
         e.preventDefault();
         window.location.hash = '#/';
       }
+      return;
     });
+    wireCompatModal();
     onHashChange();
+  }
+
+  // ---------- Platform detection ----------
+  function getPlatform() {
+    var ua = navigator.userAgent;
+    if (/android/i.test(ua)) return 'Android';
+    if (/iPad|iPhone|iPod/i.test(ua)) return 'iOS';
+    if (/Windows/i.test(ua)) return 'Windows';
+    if (/Macintosh|Mac OS X/i.test(ua)) return 'macOS';
+    if (/Linux/i.test(ua)) return 'Linux';
+    return 'Unknown';
+  }
+
+  function platformCompatible(app, platform) {
+    var target = (app.os_target || '').toLowerCase();
+    if (!target || target === 'other' || target === 'web') return true;
+    if (target === 'android') return platform === 'Android';
+    if (target === 'ios') return platform === 'iOS';
+    if (target === 'windows') return platform === 'Windows';
+    if (target === 'macos' || target === 'mac os') return platform === 'macOS';
+    if (target === 'linux') return platform === 'Linux';
+    return true;
+  }
+
+  var compatTimer = null;
+
+  function wireCompatModal() {
+    var backdrop = document.getElementById('compatBackdrop');
+    var close = document.getElementById('compatClose');
+    var dismiss = document.getElementById('compatDismiss');
+    if (close) close.addEventListener('click', hideCompatModal);
+    if (dismiss) dismiss.addEventListener('click', hideCompatModal);
+    if (backdrop) {
+      backdrop.addEventListener('click', function (e) {
+        if (e.target === backdrop) hideCompatModal();
+      });
+    }
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') hideCompatModal();
+    });
+  }
+
+  function showCompatModal(app, platform) {
+    var b = document.getElementById('compatBody');
+    var s = document.getElementById('compatSub');
+    var wa = document.getElementById('compatWa');
+    if (!b || !s || !wa) return;
+    b.innerHTML = 'This app works only on <strong>' + esc(app.os_target) + '</strong>.';
+    s.innerHTML = 'Your device appears to be running <strong>' + esc(platform) + '</strong>.';
+    var msg = 'Hello! I would like to install "' + app.name + '" (built for ' + app.os_target + '), but my device runs ' + platform + '. Could you please provide a version for ' + platform + '?';
+    wa.href = 'https://wa.me/212633977491?text=' + encodeURIComponent(msg);
+    var backdrop = document.getElementById('compatBackdrop');
+    clearTimeout(compatTimer);
+    backdrop.hidden = false;
+    requestAnimationFrame(function () { backdrop.classList.add('show'); });
+  }
+
+  function hideCompatModal() {
+    clearTimeout(compatTimer);
+    var backdrop = document.getElementById('compatBackdrop');
+    if (backdrop) {
+      backdrop.classList.remove('show');
+      backdrop.hidden = true;
+    }
   }
 
   if (document.readyState === 'loading') {
@@ -90,6 +156,7 @@
   }
 
   function onHashChange() {
+    hideCompatModal();
     var route = parseRoute(window.location.hash || '#/');
     var hero = document.getElementById('heroSection');
     if (route.view === 'app') {
@@ -145,29 +212,24 @@
     empty.hidden = true;
 
     grid.innerHTML = apps.map(function (app) {
-      var screenshotHtml = app.screenshots && app.screenshots.length
-        ? '<div class="chips"><span class="chip"><i class="fas fa-camera"></i> ' + app.screenshots.length + ' screenshot' + (app.screenshots.length > 1 ? 's' : '') + '</span></div>'
-        : '';
       return '' +
-        '<div class="app-card" data-id="' + esc(app.id) + '" role="button" tabindex="0">' +
-        '  <span class="card-chevron"><i class="fas fa-chevron-right"></i></span>' +
-        '  <div class="app-card-top">' +
-        '    ' + iconHtml(app) +
-        '    <div class="app-card-title">' +
-        '      <h3>' + esc(app.name) + '</h3>' +
-        '      <div class="app-meta"><i class="fab ' + osIcon(app.os_target) + '"></i> ' + esc(app.os_target) +
-        (app.version ? ' · v' + esc(app.version) : '') + '</div>' +
-        '    </div>' +
+        '<div class="app-row" data-id="' + esc(app.id) + '" role="button" tabindex="0">' +
+        '  ' + iconHtml(app) +
+        '  <div class="app-row-body">' +
+        '    <h3>' + esc(app.name) + '</h3>' +
+        '    <p class="app-desc">' + esc(app.description) + '</p>' +
         '  </div>' +
-        '  <p class="app-desc">' + esc(app.description) + '</p>' +
-        '  <div>' + screenshotHtml + '</div>' +
+        '  <div class="app-row-meta">' +
+        '    <span class="app-meta-item"><i class="fab ' + osIcon(app.os_target) + '"></i> ' + esc(app.os_target) + '</span>' +
+        (app.version ? '<span class="app-meta-item">v' + esc(app.version) + '</span>' : '') +
+        '  </div>' +
         '</div>';
     }).join('');
 
-    grid.querySelectorAll('.app-card').forEach(function (card) {
-      card.addEventListener('click', function (e) {
+    grid.querySelectorAll('.app-row').forEach(function (row) {
+      row.addEventListener('click', function (e) {
         if (e.target.closest('a')) return;
-        window.location.hash = '#/apps/' + card.getAttribute('data-id');
+        window.location.hash = '#/apps/' + row.getAttribute('data-id');
       });
     });
   }
@@ -271,6 +333,12 @@
       }).join('');
       document.getElementById('detailGallery').innerHTML =
         '<div class="gallery-grid">' + imgs + '</div>';
+    }
+
+    var platform = getPlatform();
+    if (platform !== 'Unknown' && !platformCompatible(app, platform)) {
+      clearTimeout(compatTimer);
+      compatTimer = setTimeout(function () { showCompatModal(app, platform); }, 800);
     }
   }
 

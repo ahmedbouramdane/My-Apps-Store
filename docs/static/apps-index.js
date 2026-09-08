@@ -2,7 +2,7 @@ window.APPS_INDEX = {
   "apps": [
     {
       "id": "my-study-archive",
-      "name": "My Study Archive - for Android",
+      "name": "My Study Archive",
       "description": "A Study App designed for Lydex-Rabat Students",
       "os_target": "Android",
       "os_label": "Android",
@@ -28,8 +28,8 @@ window.APPS_INDEX = {
         "20260907200500_3eb6d4_shot5_img1.jpeg"
       ],
       "created": "2026-09-07T20:05:00.660293",
-      "modified": "2026-09-07T20:40:30.246085"
+      "modified": "2026-09-08T16:25:05.570573"
     }
   ],
-  "generated": "2026-09-07T20:40:50.272011"
+  "generated": "2026-09-08T16:25:05.601301"
 };
