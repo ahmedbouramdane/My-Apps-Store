@@ -1,6 +1,32 @@
 window.APPS_INDEX = {
   "apps": [
     {
+      "id": "my-study-archive-windows-10-11",
+      "name": "My Study Archive - Windows 10/11",
+      "description": "A Study app designed for Lydex-Rabat Students",
+      "os_target": "Windows",
+      "os_label": "Windows",
+      "version": "2.3",
+      "developer": "Ahmed BOURAMDANE",
+      "size": 16303950,
+      "package": "20260910142449_13dc94_pkg_MyStudyArchive.exe",
+      "package_url": "/static/files/apps/my-study-archive-windows-10-11/20260910142449_13dc94_pkg_MyStudyArchive.exe",
+      "icon": "20260910142703_857f20_icon_logo.png",
+      "icon_url": "/static/files/apps/my-study-archive-windows-10-11/20260910142703_857f20_icon_logo.png",
+      "screenshots": [
+        "/static/files/apps/my-study-archive-windows-10-11/20260910142449_8b3c55_shot1_img1.png",
+        "/static/files/apps/my-study-archive-windows-10-11/20260910142449_42e5dc_shot2_img2.png",
+        "/static/files/apps/my-study-archive-windows-10-11/20260910142449_637541_shot3_img3.png"
+      ],
+      "screenshots_names": [
+        "20260910142449_8b3c55_shot1_img1.png",
+        "20260910142449_42e5dc_shot2_img2.png",
+        "20260910142449_637541_shot3_img3.png"
+      ],
+      "created": "2026-09-10T14:24:49.727189",
+      "modified": "2026-09-10T14:27:03.498481"
+    },
+    {
       "id": "my-study-archive",
       "name": "My Study Archive",
       "description": "A Study App designed for Lydex-Rabat Students",
@@ -31,5 +57,5 @@ window.APPS_INDEX = {
       "modified": "2026-09-08T16:25:05.570573"
     }
   ],
-  "generated": "2026-09-08T16:25:05.601301"
+  "generated": "2026-09-10T14:27:03.651694"
 };
